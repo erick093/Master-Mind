@@ -1,0 +1,10 @@
+﻿  Challenger.cpp
+  Constants.cpp
+  Mastermind.cpp
+C:\Users\erick\source\repos\Mastermind\Mastermind\Mastermind.cpp(14,23): warning C4101: 'len': unreferenced local variable
+C:\Users\erick\source\repos\Mastermind\Mastermind\Mastermind.cpp(14,6): warning C4101: 'id': unreferenced local variable
+C:\Users\erick\source\repos\Mastermind\Mastermind\Mastermind.cpp(15,7): warning C4101: 'processor_name': unreferenced local variable
+  Operations.cpp
+  Generating Code...
+C:\Users\erick\source\repos\Mastermind\Mastermind\Mastermind.cpp(14,10): warning C4101: 'nb_instance': unreferenced local variable
+  Mastermind.vcxproj -> C:\Users\erick\source\repos\Mastermind\Debug\Mastermind.exe
