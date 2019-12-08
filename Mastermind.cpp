@@ -31,10 +31,10 @@ int main(int argc, char* argv[])
 		cout << "Game_Master_ID: " << ID << endl;
 		//Constants::GetColors();
 		//Constants::GetSpots();
-		cout << "Spots_number: " << Constants::SPOTS << endl;
-		cout << "Colors_number: " << Constants::COLORS << endl;
+		//cout << "Spots_number: " << Constants::SPOTS << endl;
+		//cout << "Colors_number: " << Constants::COLORS << endl;
 		key = operations->GenerateKey(Constants::COLORS, Constants::SPOTS);
-		Operations::PrintArray(key, Constants::SPOTS, "key is: ");
+		//Operations::PrintArray(key, Constants::SPOTS, "key is: ");
 		//Challenger::CreateSet();
 		//Challenger::PrintCombination();
 	}
@@ -42,18 +42,17 @@ int main(int argc, char* argv[])
 	{
 		cout << "Challenger_ID: " << ID << endl;
 		challenger = new Challenger(ID);
-		challenger->CreateSet();
+		//challenger->CreateSet();
 		challenger->PrintCombination();
 	}
-	else if (ID == 2)
+	else if (ID == 2){
 		cout << "Challenger_ID: " << ID << endl;
 		challenger = new Challenger(ID);
-		challenger->CreateSet();
+		//challenger->CreateSet();
 		challenger->PrintCombination();
-
-	{
-
 	}
+
+
 	MPI_Finalize();
 	//MPI_Init(&argc, &argv);
 	//MPI_Comm_rank(MPI_COMM_WORLD, &id); 

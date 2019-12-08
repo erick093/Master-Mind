@@ -8,6 +8,7 @@ private:
 
 	int ID;
 	void CombinationRecursive(vector<int> solution, int position);
+	void WriteToFile();
 public:	
 	//static vector<int> current;
 	//static vector<int> elements;

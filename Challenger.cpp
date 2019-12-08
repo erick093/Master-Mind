@@ -3,6 +3,9 @@
 #include "Operations.h"
 #include <vector>
 #include <fstream>
+#include <iostream>
+#include <iterator>
+#include <string> 
 //vector<vector<int>> Challenger::combinations;
 
 Challenger::Challenger(int ID)
@@ -11,6 +14,7 @@ Challenger::Challenger(int ID)
 
 	this->CreateSet();
 	//this->PrintCombination();
+	this->WriteToFile();
 }
 
 
@@ -49,13 +53,15 @@ void Challenger::CreateSet()
 {
 	vector<int> solution(Constants::SPOTS);
 	int i;
-
+	int ID = Operations::GetID();
 	int solution_number = floor(Constants::COLORS / (Constants::ChallengerNodes()));
+	cout << "solution number: " << solution_number << endl;
 
 	for (i = solution_number; i > 0; i--)
 	{
 		solution[0] = this->ID * solution_number - i;
 		this->CombinationRecursive(solution, 1);
+		cout << "entering for loop ID: "<< ID <<endl;
 	}
 
 	//if (this->IscomputingExtraSolutions())
@@ -70,9 +76,8 @@ void Challenger::CombinationRecursive(vector<int> solution, int position)
 
 	for (i = 0; i < Constants::COLORS; i++)
 	{
-		int current_position = position - 1;
-		bool is_existing_symbol = false;
 		solution[position] = i;
+		
 		if (position < Constants::SPOTS - 1)
 		{
 			this->CombinationRecursive(solution, position + 1);
@@ -81,6 +86,47 @@ void Challenger::CombinationRecursive(vector<int> solution, int position)
 		{
 			this->combinations.push_back(solution);
 		}
-		
 	}
+}
+
+void Challenger::WriteToFile()
+{
+	//ofstream file;
+	//file.open((Operations::GetID() + ".txt").c_str());
+	//file.open(Operations::GetID() + ".zip");
+	//std::vector<std::string> v{ "one", "two", "three" };
+	//std::ofstream outFile( Operations::GetID() + "_Challenger.txt");
+	// the important part
+	//for (const auto& e : this->combinations) outFile << e << "\n";
+	ID = this->ID;
+	std::ofstream Out(std::to_string(ID) + "Challenger.txt");
+	//ostream_iterator<int> output_iterator(outFile, "\t");
+	ostream_iterator<int> output_iterator(Out, "\t");
+	for (int i = 0; i < this->combinations.size(); i++)
+	{
+		copy(this->combinations.at(i).begin(), this->combinations.at(i).end(), output_iterator);
+		Out << '\n';
+	}
+
+	//for (const auto& vt : this->combinations) {
+	//	std::copy(vt.cbegin(), vt.cend(),
+	//		std::ostream_iterator<int>(std::cout, " "));
+	//	std::cout << '\n';
+	//}
+	//vector< vector<int> >::iterator row_it = this->combinations.begin();
+	//vector< vector<int> >::iterator row_end = this->combinations.end();
+	//for (; row_it != row_end; ++row_it)
+	//{
+
+	//	vector<char>::iterator col_it = row_it->begin();
+	//	vector<char>::iterator col_end = row_it->end();
+
+	//	for (; col_it != col_end; ++col_it)
+	//		Out << *col_it;
+	//	Out << '\n';
+	//}
+
+	//Out.close();
+
+	
 }
