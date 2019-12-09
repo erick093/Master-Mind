@@ -9,12 +9,12 @@ int* Operations::GenerateKey(int colors, int spots)
 	int random;
 	for (int i = 0; i < spots; i++)
 	{
-	random = rand() % (colors+1);
-	do
-	{
-		random = rand() % (colors+1);
-	} while (random == 0);
-			key[i] = random;	
+	random = rand() % (colors);
+	//do
+	//{
+	//	random = rand() % (colors+1);
+	//} while (random == 0);
+	key[i] = random;	
 	}
 	return key;
 }
@@ -28,6 +28,7 @@ void Operations::PrintArray(int* array, int size, string message)
 	}
 	cout << endl;
 }
+
 int Operations::GetID()
 {
 	int PROCESS_ID;

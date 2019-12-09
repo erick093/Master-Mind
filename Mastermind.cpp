@@ -6,6 +6,7 @@
 #include "Operations.h"
 #include "Constants.h"
 #include "Challenger.h"
+#include "GameMaster.h"
 using namespace std;
 
 
@@ -20,37 +21,34 @@ int main(int argc, char* argv[])
 	Operations *operations;
 	operations = new Operations();
 	Challenger *challenger;
+	GameMaster* gamemaster;
 	MPI_Init(&argc, &argv);
 
 	ID = Operations::GetID();
-
+	//Verify if  Node is GameMaster or Challenger
 	if ( ID == 0)
 	{
 		numberofnodes = Constants::TotalNodes();
-		cout << "Total_nodes: " << numberofnodes << endl;
+		cout << "Total_nodes Playing: " << numberofnodes << endl;
 		cout << "Game_Master_ID: " << ID << endl;
-		//Constants::GetColors();
-		//Constants::GetSpots();
-		//cout << "Spots_number: " << Constants::SPOTS << endl;
-		//cout << "Colors_number: " << Constants::COLORS << endl;
+		gamemaster = new GameMaster(ID);
+
+		/*testing part begin*/ 
 		key = operations->GenerateKey(Constants::COLORS, Constants::SPOTS);
-		//Operations::PrintArray(key, Constants::SPOTS, "key is: ");
-		//Challenger::CreateSet();
-		//Challenger::PrintCombination();
+		Operations::PrintArray(key, Constants::SPOTS, "key (2) is: ");
+		/*testing part end*/
+
 	}
-	else if ( ID == 1)
+
+	else
 	{
 		cout << "Challenger_ID: " << ID << endl;
 		challenger = new Challenger(ID);
-		//challenger->CreateSet();
-		challenger->PrintCombination();
+		int* guess;
+		guess = challenger->PickRandomGuess();
+
 	}
-	else if (ID == 2){
-		cout << "Challenger_ID: " << ID << endl;
-		challenger = new Challenger(ID);
-		//challenger->CreateSet();
-		challenger->PrintCombination();
-	}
+
 
 
 	MPI_Finalize();

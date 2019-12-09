@@ -1,4 +1,6 @@
 ﻿  Challenger.cpp
-C:\Users\erick\source\repos\Mastermind\Mastermind\Challenger.cpp(57,22): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\erick\source\repos\Mastermind\Mastermind\Challenger.cpp(105,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\erick\source\repos\Mastermind\Mastermind\Challenger.cpp(58,19): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\erick\source\repos\Mastermind\Mastermind\Challenger.cpp(116,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\erick\source\repos\Mastermind\Mastermind\Challenger.cpp(127,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\erick\source\repos\Mastermind\Mastermind\Challenger.cpp(133,16): warning C4018: '<': signed/unsigned mismatch
   Mastermind.vcxproj -> C:\Users\erick\source\repos\Mastermind\Debug\Mastermind.exe
