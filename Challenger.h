@@ -16,8 +16,10 @@ public:
 	Challenger(int ID);
 	vector<vector<int>> combinations;
 	void CreateSet();
-	int* PickRandomGuess();
+	//int* PickRandomGuess();
+	vector<int> PickRandomGuess();
 	void PrintCombination();
+	void SendData(void* send_data, MPI_Datatype send_datatype, MPI_Comm communicator);
 
 };
 

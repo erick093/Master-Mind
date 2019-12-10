@@ -18,38 +18,74 @@ int main(int argc, char* argv[])
 	int numberofnodes;
 	int *key;
 	int ID;
+	//int guess[Constants::SPOTS];
 	Operations *operations;
 	operations = new Operations();
 	Challenger *challenger;
 	GameMaster* gamemaster;
 	MPI_Init(&argc, &argv);
-
+	gamemaster = new GameMaster(0);
+	int guesses_array[Constants::SPOTS];
+	//int* guess;
+	int *received_data, *choosen_guess, *evaluated_guess;
 	ID = Operations::GetID();
 	//Verify if  Node is GameMaster or Challenger
+
 	if ( ID == 0)
 	{
 		numberofnodes = Constants::TotalNodes();
 		cout << "Total_nodes Playing: " << numberofnodes << endl;
 		cout << "Game_Master_ID: " << ID << endl;
-		gamemaster = new GameMaster(ID);
+		received_data = gamemaster->ReceiveData(&guesses_array, MPI_INT, MPI_COMM_WORLD);
+		choosen_guess = gamemaster->RandomChoice(received_data, MPI_INT);
+		evaluated_guess = gamemaster->EvaluateChoice(choosen_guess);
 
+		//all_guesses = gamemaster->ReceiveData(&guesses_array, MPI_INT, MPI_COMM_WORLD);
+		//for (int i = 0; i < sizeof(all_guesses); ++i) printf("%d ", all_guesses[i]);
+		//size_t n = sizeof(all_guesses) / sizeof(all_guesses[0]);
+		//size_t n = sizeof(all_guesses);
+		//cout << "value of n: " << n <<endl;
+		//// loop through the elements of the array
+		//for (size_t i = 0; i < n; i++) {
+		//	std::cout << all_guesses[i] << ' ';
+		//}
+
+		//gamemaster->ReceiveData(,MPI_INT,MPI_COMM_WORLD);
 		/*testing part begin*/ 
-		key = operations->GenerateKey(Constants::COLORS, Constants::SPOTS);
-		Operations::PrintArray(key, Constants::SPOTS, "key (2) is: ");
+	/*	key = operations->GenerateKey(Constants::COLORS, Constants::SPOTS);
+		Operations::PrintArray(key, Constants::SPOTS, "key (2) is: ");*/
 		/*testing part end*/
 
 	}
 
 	else
 	{
+
 		cout << "Challenger_ID: " << ID << endl;
 		challenger = new Challenger(ID);
-		int* guess;
+		vector<int> guess;
 		guess = challenger->PickRandomGuess();
+		unsigned int i;
+		cout << "Guess Choosen by Challenger_" << ID << " is: ";
+		for (i = 0; i <guess.size(); i++)
+		{
+			guesses_array[i] = guess[i];
+			cout << guesses_array[i];
+		}
+		challenger->SendData(&guesses_array,MPI_INT,MPI_COMM_WORLD);
 
 	}
 
-
+	//while (true)
+	//{
+	//	all_guesses = gamemaster->ReceiveData(&guesses_array, MPI_INT, MPI_COMM_WORLD);
+	//	size_t n = sizeof(all_guesses);
+	//	cout << "value of n: " << n << endl;
+	//	// loop through the elements of the array
+	//	for (size_t i = 0; i < n; i++) {
+	//		std::cout << all_guesses[i] << ' ';
+	//	}
+	//}
 
 	MPI_Finalize();
 	//MPI_Init(&argc, &argv);

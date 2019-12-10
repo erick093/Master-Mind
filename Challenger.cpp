@@ -93,17 +93,19 @@ void Challenger::CombinationRecursive(vector<int> solution, int position)
 }
 
 
-//void Challenger::SendGuess(void* number, MPI_Datatype datatype, MPI_Comm communication_channel)
-//{
-//	int datatype_size;
-//	int* numbers = (int*)number;
-//
-//	MPI_Type_size(datatype, &datatype_size);
-//
-//	numbers[GameSettings::POSITIONS + 1] = 0;
-//	MPI_Gather(numbers, GameSettings::POSITIONS + 1, datatype, NULL, GameSettings::POSITIONS + 1,
-//		datatype, 0, communication_channel);
-//}
+void Challenger::SendData(void* send_data, MPI_Datatype send_datatype, MPI_Comm communicator)
+{
+	//int datatype_size;
+	int* guess	 = (int*)send_data;
+
+	//MPI_Type_size(datatype, &datatype_size);
+	
+	guess[Constants::ErrorBit] = 0; //Setting error bit to 0 
+	int send_count = Constants::SPOTS + 1;
+	int root = 0; //GameMaster ID
+	MPI_Gather(guess, send_count, send_datatype, NULL, send_count,
+		send_datatype, root, communicator);
+}
 
 
 void Challenger::WriteToFile()
@@ -122,20 +124,30 @@ void Challenger::WriteToFile()
 	
 }
 
-int*  Challenger::PickRandomGuess()
+vector<int>  Challenger::PickRandomGuess()
 {
 	srand(time(0));
 	vector<int> RandomGuess = this->combinations[rand() % this->combinations.size()];
-	static int RandomGuess_array[Constants::SPOTS];
-	
-	int i;
-	cout << "Guess Choosen by Challenger_" << this->ID<< " is: ";
-	for (i = 0; i < RandomGuess.size(); i++)
-	{
-		RandomGuess_array[i] = RandomGuess[i];
-		cout << RandomGuess_array[i] ;
-	}
 
 
-	return RandomGuess_array;
+
+	return RandomGuess;
 }
+
+//int* Challenger::PickRandomGuess()
+//{
+//	srand(time(0));
+//	vector<int> RandomGuess = this->combinations[rand() % this->combinations.size()];
+//	static int RandomGuess_array[Constants::SPOTS];
+//
+//	int i;
+//	cout << "Guess Choosen by Challenger_" << this->ID << " is: ";
+//	for (i = 0; i < RandomGuess.size(); i++)
+//	{
+//		RandomGuess_array[i] = RandomGuess[i];
+//		cout << RandomGuess_array[i];
+//	}
+//
+//
+//	return RandomGuess_array;
+//}

@@ -7,8 +7,9 @@ class Constants
 private:
 	
 public:	
-	static const int COLORS = 3 ;
-	static const int SPOTS = 3;
+	static const int COLORS = 5 ;
+	static const int SPOTS = 5;
+	static const int ErrorBit = SPOTS + 1;
 	//static  int COLORS = 2;
 	//static  int SPOTS = 2;
 	//static void GetColors();
