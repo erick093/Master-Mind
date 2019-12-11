@@ -7,109 +7,142 @@
 #include "Constants.h"
 #include "Challenger.h"
 #include "GameMaster.h"
+#include "mpi.h"
 using namespace std;
+bool Winner(int* evaluation,int ID)
+{
+	bool win = false;
+	int number_of_perfects = evaluation[Constants::SPOTS];
+	//cout << "number of perfects: " << number_of_perfects;
+	//cout << "Spots" << Constants::SPOTS;
+	if (number_of_perfects == Constants::SPOTS)
+	{
+		if (ID==0)
+		{
+			cout << "Challenger guessed the solution.";
 
+		}
+		win = true;
+	}
+	//cout << "Boolean: " << win;
+	return win;
+}
 
 
 int main(int argc, char* argv[])
 {
-	int id, nb_instance, len;
-	char processor_name[MPI_MAX_PROCESSOR_NAME];
+	MPI_Init(NULL, NULL);
+	//int count = 10;
+//	int id, nb_instance, len;
+	//char processor_name[MPI_MAX_PROCESSOR_NAME];
 	int numberofnodes;
-	int *key;
+	//int *key;
 	int ID;
-	//int guess[Constants::SPOTS];
 	Operations *operations;
+	Challenger* challenger= NULL;
+	GameMaster* gamemaster = NULL;
 	operations = new Operations();
-	Challenger *challenger;
-	GameMaster* gamemaster;
-	MPI_Init(&argc, &argv);
-	gamemaster = new GameMaster(0);
 	int guesses_array[Constants::SPOTS];
 	//int* guess;
-	int *received_data, *choosen_guess, *evaluated_guess;
+	int *received_data, *choosen_guess;
+	int* evaluated_guess{};
+	evaluated_guess = (int*)malloc(sizeof(int) * (Constants::SPOTS + 2));
 	ID = Operations::GetID();
+	int count_perfects;
+	
+	//bool ready = false;
 	//Verify if  Node is GameMaster or Challenger
-
-	if ( ID == 0)
+	if (ID != 0)
 	{
-		numberofnodes = Constants::TotalNodes();
-		cout << "Total_nodes Playing: " << numberofnodes << endl;
-		cout << "Game_Master_ID: " << ID << endl;
-		received_data = gamemaster->ReceiveData(&guesses_array, MPI_INT, MPI_COMM_WORLD);
-		choosen_guess = gamemaster->RandomChoice(received_data, MPI_INT);
-		evaluated_guess = gamemaster->EvaluateChoice(choosen_guess);
-
-		//all_guesses = gamemaster->ReceiveData(&guesses_array, MPI_INT, MPI_COMM_WORLD);
-		//for (int i = 0; i < sizeof(all_guesses); ++i) printf("%d ", all_guesses[i]);
-		//size_t n = sizeof(all_guesses) / sizeof(all_guesses[0]);
-		//size_t n = sizeof(all_guesses);
-		//cout << "value of n: " << n <<endl;
-		//// loop through the elements of the array
-		//for (size_t i = 0; i < n; i++) {
-		//	std::cout << all_guesses[i] << ' ';
-		//}
-
-		//gamemaster->ReceiveData(,MPI_INT,MPI_COMM_WORLD);
-		/*testing part begin*/ 
-	/*	key = operations->GenerateKey(Constants::COLORS, Constants::SPOTS);
-		Operations::PrintArray(key, Constants::SPOTS, "key (2) is: ");*/
-		/*testing part end*/
-
-	}
-
-	else
-	{
-
 		cout << "Challenger_ID: " << ID << endl;
 		challenger = new Challenger(ID);
-		vector<int> guess;
-		guess = challenger->PickRandomGuess();
-		unsigned int i;
-		cout << "Guess Choosen by Challenger_" << ID << " is: ";
-		for (i = 0; i <guess.size(); i++)
-		{
-			guesses_array[i] = guess[i];
-			cout << guesses_array[i];
-		}
-		challenger->SendData(&guesses_array,MPI_INT,MPI_COMM_WORLD);
-
 	}
+	else
+	{
+		
+		gamemaster = new GameMaster(0);
+	}
+	do {
 
-	//while (true)
-	//{
-	//	all_guesses = gamemaster->ReceiveData(&guesses_array, MPI_INT, MPI_COMM_WORLD);
-	//	size_t n = sizeof(all_guesses);
-	//	cout << "value of n: " << n << endl;
-	//	// loop through the elements of the array
-	//	for (size_t i = 0; i < n; i++) {
-	//		std::cout << all_guesses[i] << ' ';
-	//	}
-	//}
+		//ready = false;
+		if ( ID == 0)
+		{
 
+			numberofnodes = Constants::TotalNodes();
+			//cout << "Total_nodes Playing: " << numberofnodes << endl;
+			cout << "Game_Master_ID: " << ID << endl;
+			gamemaster->PrintKey();
+			received_data = gamemaster->ReceiveData(&guesses_array, MPI_INT, MPI_COMM_WORLD);
+			choosen_guess = gamemaster->RandomChoice(received_data, MPI_INT);
+			evaluated_guess = gamemaster->EvaluateChoice(choosen_guess);
+			gamemaster->SendEvaluation(evaluated_guess, MPI_INT, MPI_COMM_WORLD);
+			//ready = true;
+			//free(evaluated_guess);
+
+			//all_guesses = gamemaster->ReceiveData(&guesses_array, MPI_INT, MPI_COMM_WORLD);
+			//for (int i = 0; i < sizeof(all_guesses); ++i) printf("%d ", all_guesses[i]);
+			//size_t n = sizeof(all_guesses) / sizeof(all_guesses[0]);
+			//size_t n = sizeof(all_guesses);
+			//cout << "value of n: " << n <<endl;
+			//// loop through the elements of the array
+			//for (size_t i = 0; i < n; i++) {
+			//	std::cout << all_guesses[i] << ' ';
+			//}
+
+			//gamemaster->ReceiveData(,MPI_INT,MPI_COMM_WORLD);
+			/*testing part begin*/ 
+		/*	key = operations->GenerateKey(Constants::COLORS, Constants::SPOTS);
+			Operations::PrintArray(key, Constants::SPOTS, "key (2) is: ");*/
+			/*testing part end*/
+
+		}
+
+		else
+		{
+
+			//int* received_temp{};
+			vector<int> guess;
+			if (challenger->NotEmptyGuesses()) 
+			{
+				guess = challenger->PickRandomGuess();
+				unsigned int i;
+				cout << "Guess Choosen by Challenger_" << ID << " is: ";
+				for (i = 0; i < guess.size(); i++)
+				{
+					guesses_array[i] = guess[i];
+					cout << guesses_array[i];
+				}
+				cout << endl;
+				challenger->SendData(&guesses_array, MPI_INT, MPI_COMM_WORLD);
+			
+			
+			}
+			else {
+				cout << "Sending Error "<<endl;
+				challenger->SendError(MPI_COMM_WORLD);
+			}
+			//if (ready) {
+				//cout << " Ready True!";
+				challenger->ReceiveEvaluation(evaluated_guess, MPI_INT, MPI_COMM_WORLD);
+				cout << ID <<"_Received" <<endl;
+				for (size_t i = 0; i < sizeof(evaluated_guess) + 1; i++)
+				{
+					
+					cout << evaluated_guess[i];
+				}
+				cout << endl;
+			challenger->FilterGuesses(evaluated_guess);
+			count_perfects = evaluated_guess[Constants::SPOTS];
+			//cout << "My counter is: "<< count_perfects;
+			//free(evaluated_guess);
+			//}
+			//challenger->FilterGuesses(evaluated_guess);
+
+		}
+		//count--;
+		//cout << "aqui stoyxdxd";
+	} while (!(Winner(evaluated_guess,ID)));
 	MPI_Finalize();
-	//MPI_Init(&argc, &argv);
-	//MPI_Comm_rank(MPI_COMM_WORLD, &id); 
-	//MPI_Comm_size(MPI_COMM_WORLD, &nb_instance); 
-	//MPI_Get_processor_name(processor_name, &len);
-	//cout << "Hello world! I am " << id << " of " << nb_instance << " on " << processor_name <<endl;
-	//numberofnodes = Constants::NumberOfNodes();
-	//cout << "Number of Nodes is : " << numberofnodes << endl;
-	//MPI_Finalize();
-
-	 
-
-
-    //std::cout << "Hello World!\n";
+	return EXIT_SUCCESS;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

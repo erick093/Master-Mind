@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -N out
+#PBS -l walltime=00:05:00
+
+#PBS -l nodes=3:ppn=1
+#PBS -l mem=32gb
+
+cd $PBS_O_WORKDIR
+# load the environment
+module load OpenMPI/3.1.4-GCC-8.3.0
+make mastermind
+rm *.o
+mpirun -mca btl ^openib ./mastermind

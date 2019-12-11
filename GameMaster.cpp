@@ -9,7 +9,7 @@ GameMaster::GameMaster(int ID = 0)
 {
 	this->ID = ID;
 	this->GetKey();
-	this->PrintKey(this->key);
+	//this->PrintKey(this->key);
 }
 
 void GameMaster::GetKey() {
@@ -29,16 +29,42 @@ void GameMaster::GetKey() {
 	//return code;
 }
 
-void GameMaster::PrintKey(vector<int> const& input)
-{	
-	cout << "Key is: " <<endl;
-	for (auto const& i : input) {
+//void GameMaster::PrintKey(vector<int> const& input)
+//{	
+//	cout << "Key is: " <<endl;
+//	for (auto const& i : input) {
+//		cout << i << " ";
+//	}
+//	cout << endl;
+//}
+
+void GameMaster::PrintKey()
+{
+	cout << "Key is: " << endl;
+	for (auto const& i : key) {
 		cout << i << " ";
 	}
 	cout << endl;
 }
 
-int* GameMaster::ReceiveData(void* send_data, MPI_Datatype receive_datatype, MPI_Comm communicator)
+void GameMaster::CheckIDLE(int* data)
+{
+	int i;
+	int status_code;
+	int number_challengers = Constants::TotalNodes();
+
+	for (i = 0; i < number_challengers; i++)
+	{
+		status_code = data[i * (Constants::SPOTS + 1) + Constants::SPOTS];
+
+		if (status_code == 1)
+		{
+			cout << "Challenger_" << i << " IDLE" << endl;
+		}
+	}
+}
+
+int *GameMaster::ReceiveData(void* send_data, MPI_Datatype receive_datatype, MPI_Comm communicator)
 {
 	int data_buffer_size;
 	int total_size;
@@ -46,12 +72,13 @@ int* GameMaster::ReceiveData(void* send_data, MPI_Datatype receive_datatype, MPI
 	int receive_count = Constants::SPOTS + 1;
 	int root = 0; //GameMaster ID
 	MPI_Type_size(receive_datatype, &data_buffer_size);
-	
 	total_size = data_buffer_size * Constants::TotalNodes() * (receive_count);  // allocating space for all guesses from all challengers
 	data_buffer = (int*)malloc(total_size);
 	
 	MPI_Gather(send_data, receive_count, receive_datatype, data_buffer, receive_count,
 		receive_datatype, root, communicator);
+
+	this->CheckIDLE(data_buffer);
 
 	return data_buffer;
 }
@@ -95,23 +122,27 @@ int* GameMaster::EvaluateChoice(int* data) {
 		evaluation[i] = data[i];
 		if (this->key[i] == data[i]) {
 			perfect += 1;
-			data[i] *= -1;
+			data[i] += 1;
+			data[i] *= -1;			
+			copy_key[i] += 1;
 			copy_key[i] *= -1;
 			//cout << endl;
-			//cout << "Perfect found" << endl;
+			//cout << "Perfect found" << evaluation[i]<< endl;
 		}
 
 	}
 
-	for (int j = 0; j < Constants::SPOTS; ++j) {
-		if (copy_key[j] > 0)
+	for (size_t j = 0; j < Constants::SPOTS; ++j) {
+		if (copy_key[j] >= 0)
 		{
 			//cout << "Copy Key: " << copy_key[j] << "index j: " << j << endl;
-			for (int x = 0; x < Constants::SPOTS; ++x) {
-				if (data[x]>0 && data[x]==copy_key[j] )
+			for (size_t x = 0; x < Constants::SPOTS; ++x) {
+				//cout <<"Important!!" <<data[x] << copy_key[j];
+				if (data[x]>=0 && data[x]==copy_key[j] )
 				{
 					color++;
 					//cout << "Guess: "<<data[x]<<"index x: "<< x <<endl;
+					data[x] += 1;
 					data[x] *= -1;
 					break;
 				}
@@ -134,4 +165,34 @@ void GameMaster::PrintEvaluation(int* evaluation) {
 	{
 		cout << evaluation[i];
 	}
+	cout << endl;
 }
+
+void GameMaster::SendEvaluation(int* send_data, MPI_Datatype send_datatype, MPI_Comm communicator)  
+{
+	int total = Constants::SPOTS + 2;
+	int error=0,eclass,len;
+	char estring[MPI_MAX_ERROR_STRING];
+	MPI_Error_class(error, &eclass);
+	MPI_Error_string(error, estring, &len);
+	for (int i = 1; i < Constants::TotalNodes() ; i++)
+	{
+		
+		if (i != this->ID) {
+			error = MPI_Send((send_data), total, send_datatype, i, 0, communicator);
+			//printf("Error %d: %s\n", eclass, estring); fflush(stdout);
+			cout << "Sending info Master to Challenger_" << i << endl;
+		}
+
+	}
+	//cout << endl;
+	//cout << "Printing buffer" << endl;
+	//for (int i = 0; i < sizeof(send_data) + 1; i++)
+	//{
+	//	cout << send_data[i];
+	//}
+	//cout << "End printin buffer" << endl;
+	//cout << endl;
+
+}
+
