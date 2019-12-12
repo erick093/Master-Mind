@@ -14,36 +14,11 @@
 Challenger::Challenger(int ID)
 {
 	this->ID = ID;
-
 	this->CreateSet();
-	//this->PrintCombination();
-	//this->WriteToFile();
+	this->WriteToFile();
+	this->InitFile();
 }
 
-
-//void Challenger::CreateSet() {
-//	static vector<int> elements;
-//	vector<int> current(Constants::SPOTS, 0);
-//	for (int i = 1; i <= Constants::COLORS; ++i) {
-//		elements.push_back(i);
-//	}
-//
-//	CombinationRecursive(Constants::SPOTS, 0, current, elements);
-//}
-
-//void Challenger::CombinationRecursive(int combinationLength, int position, vector<int>& current, vector<int>& elements) {
-//
-//	if (position >= combinationLength) {
-//		Challenger::combinations.push_back(current);
-//		return;
-//	}
-//
-//	for (size_t j = 0; j < elements.size(); ++j) {
-//		current[position] = elements[j];
-//		Challenger::CombinationRecursive(combinationLength, position + 1, current, elements);
-//	}
-//	return;
-//}
 
 bool Challenger::NotEmptyGuesses()
 {
@@ -69,6 +44,7 @@ void Challenger::PrintCombination() {
 
 void Challenger::CreateSet()
 {
+	//cout<<"Intentando crear set...";
 	vector<int> vec_sol(Constants::SPOTS);
 	int i;
 	//int ID = Operations::GetID();
@@ -121,6 +97,8 @@ void Challenger::SendData(void* send_data, MPI_Datatype send_datatype, MPI_Comm 
 	guess[Constants::ErrorBit] = 0; //Setting error bit to 0 
 	int send_count = Constants::SPOTS + 1;
 	int root = 0; //GameMaster ID
+	cout << endl;
+	cout << "sending challenger info"<<endl;
 	MPI_Gather(guess, send_count, send_datatype, NULL, send_count,
 		send_datatype, root, communicator);
 }
@@ -130,10 +108,9 @@ void Challenger::WriteToFile()
 {
 
 	ID = this->ID;
-	std::ofstream Out(std::to_string(ID) + "_Challenger.txt");
-	//ostream_iterator<int> output_iterator(outFile, "\t");
+	std::ofstream Out(std::to_string(ID) + "_Total_Pool_Challenger.txt");
 	ostream_iterator<int> output_iterator(Out, "\t");
-	for (int i = 0; i < this->combinations.size(); i++)
+	for (size_t i = 0; i < this->combinations.size(); i++)
 	{
 		copy(this->combinations.at(i).begin(), this->combinations.at(i).end(), output_iterator);
 		Out << '\n';
@@ -141,14 +118,26 @@ void Challenger::WriteToFile()
 
 	
 }
-void Challenger::WriteToFile_2()
-{
-
+void Challenger::InitFile() {
 	ID = this->ID;
 	std::ofstream Out(std::to_string(ID) + "_Challenger_Filtered.txt");
+}
+void Challenger::WriteToFile_2()
+{
+	ID = this->ID;
+	//std::ofstream Out(std::to_string(ID) + "_Challenger_Filtered.txt");
+	std::ofstream Out;
+	Out.open(std::to_string(ID) + "_Challenger_Filtered.txt", std::ios_base::app);
+	Out << "############################################";
+	for (size_t i = 0; i < Constants::SPOTS; i++)
+	{
+		Out << this->temp_eval[i];
+	}
+	Out << "############################################";
+	Out << '\n';
 	//ostream_iterator<int> output_iterator(outFile, "\t");
 	ostream_iterator<int> output_iterator(Out, "\t");
-	for (int i = 0; i < this->combinations.size(); i++)
+	for (size_t i = 0; i < this->combinations.size(); i++)
 	{
 		copy(this->combinations.at(i).begin(), this->combinations.at(i).end(), output_iterator);
 		Out << '\n';
@@ -159,11 +148,8 @@ void Challenger::WriteToFile_2()
 
 vector<int>  Challenger::PickRandomGuess()
 {
-	srand(time(0));
+	srand((unsigned int)time(0));
 	vector<int> RandomGuess = this->combinations[rand() % this->combinations.size()];
-
-
-
 	return RandomGuess;
 }
 
@@ -176,15 +162,19 @@ void Challenger::ReceiveEvaluation(int* receive_data, MPI_Datatype send_datatype
 	MPI_Status status;
 	int total = Constants::SPOTS + 2;
 	//cout <<this->ID << "_Receiving"  ;
-	cout << endl;
+	//cout << endl;
 	//MPI_Recv(&(receive_data[0]), total, send_datatype, 0, 0, communicator, MPI_STATUS_IGNORE); ///MPI STATUS IGNORE in order to not allocate the status message.
 	error = MPI_Recv(receive_data, total, send_datatype, 0, 0, communicator, &status);
+
+	this->temp_eval = receive_data;
+
 	//printf("Error %d: %s\n", eclass, estring); fflush(stdout);
-	//for (size_t i = 0; i < sizeof(receive_data)+1; i++)
+	//cout <<this->ID<<"_Received data: ";
+	//for (size_t i = 0; i < Constants::SPOTS + 2; i++)
 	//{
 	//	cout <<receive_data[i] ;
 	//}
-	cout << endl;
+	//cout << endl;
 }
 
 
@@ -209,7 +199,7 @@ void Challenger::FilterGuesses(int* evaluation )
 	}
 
 	this->combinations = positions_to_filter;
-	//this->WriteToFile_2();
+	this->WriteToFile_2();
 }
 
 
@@ -218,7 +208,7 @@ bool Challenger::CheckGuess(vector<int> guess, int* evaluation)
 {
 	int temp[Constants::SPOTS+2];
 	//cout << "New Temp: ";
-	for (size_t i = 0; i < sizeof(evaluation) + 1; i++)
+	for (size_t i = 0; i < Constants::SPOTS + 2; i++)
 	{
 		 temp[i]= evaluation[i];
 		 //cout << temp[i];
@@ -271,7 +261,7 @@ bool Challenger::CheckGuess(vector<int> guess, int* evaluation)
 	}
 	//cout << "Calculated Perfect: Calculated Color: " << guess_perfect << guess_color;
 	//cout << endl;
-	if (guess_perfect == evaluation_perfect && guess_color == evaluation_color)
+	if (guess_perfect == evaluation_perfect && guess_color >= evaluation_color)
 	{
 		return true;
 	}
@@ -284,22 +274,3 @@ bool Challenger::CheckGuess(vector<int> guess, int* evaluation)
 
 
 
-
-
-//int* Challenger::PickRandomGuess()
-//{
-//	srand(time(0));
-//	vector<int> RandomGuess = this->combinations[rand() % this->combinations.size()];
-//	static int RandomGuess_array[Constants::SPOTS];
-//
-//	int i;
-//	cout << "Guess Choosen by Challenger_" << this->ID << " is: ";
-//	for (i = 0; i < RandomGuess.size(); i++)
-//	{
-//		RandomGuess_array[i] = RandomGuess[i];
-//		cout << RandomGuess_array[i];
-//	}
-//
-//
-//	return RandomGuess_array;
-//}

@@ -5,12 +5,13 @@
 class Challenger
 {
 private:
-
+	int* temp_eval;
 	int ID;
 	void CombinationRecursive(vector<int> solution, int position);
 	void WriteToFile();
 	void WriteToFile_2();
 	bool CheckGuess(vector<int> guess, int* evaluation);
+	void InitFile();
 	
 public:	
 	//static vector<int> current;

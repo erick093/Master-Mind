@@ -37,3 +37,24 @@ int Operations::GetID()
 
 	return PROCESS_ID;
 }
+
+bool Operations::Winner(int* evaluation, int ID)
+{
+	bool win = false;
+	int number_of_perfects = evaluation[Constants::SPOTS];
+	if (number_of_perfects == Constants::SPOTS)
+	{
+		if (ID == 0)
+		{
+			cout << "Challenger guessed the solution:";
+			for (size_t i = 0; i < Constants::SPOTS; i++)
+			{
+				cout << evaluation[i];
+			}
+		}
+		win = true;
+	}
+	
+
+	return win;
+}

@@ -15,9 +15,7 @@
 
 int Constants::TotalNodes(){
 	int comm_size;
-
 	MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-
 	return comm_size;
 }
 int Constants::ChallengerNodes() {

@@ -18,7 +18,7 @@ void GameMaster::GetKey() {
 	int max =Constants::COLORS;
 	int min = 0;
 	int random;
-	srand(time(0));
+	srand((unsigned int)time(0));
 
 	for (int i = 0; i < Constants::SPOTS; ++i) {
 
@@ -72,12 +72,12 @@ int *GameMaster::ReceiveData(void* send_data, MPI_Datatype receive_datatype, MPI
 	int receive_count = Constants::SPOTS + 1;
 	int root = 0; //GameMaster ID
 	MPI_Type_size(receive_datatype, &data_buffer_size);
-	total_size = data_buffer_size * Constants::TotalNodes() * (receive_count);  // allocating space for all guesses from all challengers
+	total_size = data_buffer_size * Constants::TotalNodes() * (Constants::SPOTS + 1);  // allocating space for all guesses from all challengers
 	data_buffer = (int*)malloc(total_size);
-	
-	MPI_Gather(send_data, receive_count, receive_datatype, data_buffer, receive_count,
+	//cout << "before gather" << endl;
+	MPI_Gather(send_data, Constants::SPOTS + 1, receive_datatype, data_buffer, Constants::SPOTS + 1,
 		receive_datatype, root, communicator);
-
+	//cout << "after gather" << endl;
 	this->CheckIDLE(data_buffer);
 
 	return data_buffer;
@@ -114,10 +114,12 @@ int* GameMaster::EvaluateChoice(int* data) {
 	int perfect = 0;
 	int color = 0;
 	int* evaluation = (int*)malloc((Constants::SPOTS + 2) * sizeof(int)); // +2 since we add 1 "bit" for perfect counter and 1 "bit" for color counter
+	//cout << "Size of Buffer(Inside): " << sizeof(evaluation);
 	int perfect_bit = Constants::SPOTS;
 	int color_bit = Constants::SPOTS + 1;
 	vector<int> copy_key = this->key;
-
+	//cout <<endl;
+	//cout << "In evaluation" << endl;
 	for (int i = 0; i < Constants::SPOTS; ++i) {
 		evaluation[i] = data[i];
 		if (this->key[i] == data[i]) {
@@ -131,7 +133,7 @@ int* GameMaster::EvaluateChoice(int* data) {
 		}
 
 	}
-
+	//cout << "After perfects" <<endl;
 	for (size_t j = 0; j < Constants::SPOTS; ++j) {
 		if (copy_key[j] >= 0)
 		{
@@ -149,6 +151,7 @@ int* GameMaster::EvaluateChoice(int* data) {
 			}
 		}
 	}
+	//cout << "After colors" << endl;
 	evaluation[perfect_bit] = perfect;
 	evaluation[color_bit] = color;
 	this->PrintEvaluation(evaluation);
@@ -179,20 +182,14 @@ void GameMaster::SendEvaluation(int* send_data, MPI_Datatype send_datatype, MPI_
 	{
 		
 		if (i != this->ID) {
+			//cout << "Send node" << i << endl;
 			error = MPI_Send((send_data), total, send_datatype, i, 0, communicator);
 			//printf("Error %d: %s\n", eclass, estring); fflush(stdout);
-			cout << "Sending info Master to Challenger_" << i << endl;
+			//cout << "Sending info Master to Challenger_" << i << endl;
 		}
 
 	}
-	//cout << endl;
-	//cout << "Printing buffer" << endl;
-	//for (int i = 0; i < sizeof(send_data) + 1; i++)
-	//{
-	//	cout << send_data[i];
-	//}
-	//cout << "End printin buffer" << endl;
-	//cout << endl;
+
 
 }
 

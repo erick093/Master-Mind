@@ -1,3 +1,8 @@
-﻿  GameMaster.cpp
-C:\Users\erick\source\repos\Mastermind\Mastermind\GameMaster.cpp(21,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+﻿  Challenger.cpp
+  Constants.cpp
+  GameMaster.cpp
+  Mastermind.cpp
+  Operations.cpp
+  Generating Code...
+C:\Users\erick\source\repos\Mastermind\Mastermind\Challenger.cpp(51,19): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
   Mastermind.vcxproj -> C:\Users\erick\source\repos\Mastermind\Debug\Mastermind.exe
